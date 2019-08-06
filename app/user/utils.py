@@ -7,15 +7,28 @@ class Transformer:
 
     @staticmethod
     def get_first_name(user):
-        return user['name']['first']
+        if type(user) is str:
+            first_name = user.split(' ')[0]
+        else:
+            first_name = user['name']['first']
+
+        return first_name.capitalize()
 
     @staticmethod
     def get_last_name(user):
-        return user['name']['last']
+        if type(user) is str:
+            last_name = user.split(' ')[1]
+        else:
+            last_name = user['name']['last']
+
+        return last_name.capitalize()
 
     @staticmethod
     def create_email(user):
-        return Transformer.get_first_name(user) + '.' + Transformer.get_last_name(user) + '@mailinator.com'
+        return Transformer.get_first_name(user).lower() + \
+               '.' + \
+               Transformer.get_last_name(user).lower() + \
+               '@mailinator.com'
 
     @staticmethod
     def create_user_profiles(users, school, role):
@@ -23,10 +36,10 @@ class Transformer:
         for u in users:
             logger.info('Creating profile for user: %s', u)
             profile = {
-                'Name': Transformer.get_first_name(u).capitalize() + ' ' + Transformer.get_last_name(u).capitalize(),
+                'Name': Transformer.get_first_name(u) + ' ' + Transformer.get_last_name(u),
                 'Email': Transformer.create_email(u),
                 'Password': 'Tams123',
-                'School': school,
+                'School': school['Name'],
                 'Role': role
             }
             user_profiles.append(profile)

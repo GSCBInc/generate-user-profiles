@@ -4,6 +4,7 @@ from app.http.services import RestClient
 from app.user.utils import Transformer
 
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +19,8 @@ class Application:
 			'Nigeria', 'Pakistan', 'Poland', 'Portugal', 'Spain', 'Turkey', 'United States'
 		]
 		self.urls = [
-			'https://uinames.com/api/?region={region}&amount=5',
-			'https://randomuser.me/api/?inc=name&results=5'
+			'https://node-data-generator.herokuapp.com/api/names/fullNames?n=5',
+			'https://randomuser.me/api/?inc=name,location&results=5&nat=us,au,br,ca,ch,de,dk,es,fi,fr,gb,ie,lego,nl,no,nz'
 		]
 		self.roles = [
 			'District Admin', 'Principal', 'Assistant Principal',
@@ -34,11 +35,13 @@ class Application:
 
 		for school in schools:
 			logger.info('School: %s', school['Name'])
-			base_url = self.urls[1]
+			random_url_integer = random.randrange(2)
+			base_url = self.urls[random_url_integer]
 
 			for role in self.roles:
 				users = RestClient.get(base_url, {})
-				users = users['results']
+				if random_url_integer == 1:
+					users = users['results']
 
 				user_profiles = Transformer.create_user_profiles(users, school, role)
 				CsvWriter.write(data=user_profiles)
