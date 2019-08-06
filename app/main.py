@@ -4,7 +4,6 @@ from app.http.services import RestClient
 from app.user.utils import Transformer
 
 import logging
-import random
 
 logger = logging.getLogger(__name__)
 
@@ -12,36 +11,42 @@ logger = logging.getLogger(__name__)
 class Application:
 
 	def __init__(self):
-		self.allowed_regions = [
-			'Albania', 'Argentina', 'Australia', 'Austria', 'Belgium', 'Brazil', 'Canada',
-			'Colombia', 'Costa Rica', 'Denmark', 'England', 'France', 'Germany', 'India',
-			'Indonesia', 'Ireland', 'Italy', 'Mexico', 'Morocco', 'Nepal', 'New Zealand',
-			'Nigeria', 'Pakistan', 'Poland', 'Portugal', 'Spain', 'Turkey', 'United States'
-		]
+		self.url_index = None
 		self.urls = [
-			'https://node-data-generator.herokuapp.com/api/names/fullNames?n=5',
-			'https://randomuser.me/api/?inc=name,location&results=5&nat=us,au,br,ca,ch,de,dk,es,fi,fr,gb,ie,lego,nl,no,nz'
+			'https://node-data-generator.herokuapp.com/api/names/fullNames?n=5000',
+			'https://randomuser.me/api/?inc=name,location&results=5000&nat=us'
 		]
 		self.roles = [
 			'District Admin', 'Principal', 'Assistant Principal',
 			'Counselor', 'Security Resource Officer'
 		]
 
+	def get_generated_names(self):
+		self.url_index = 1 if self.url_index == 0 else 0
+		return RestClient.get(self.urls[self.url_index], {})
+
 	def start(self):
 		logger.info('Application has started')
 		schools = CsvReader.read()
 
 		logger.info('Read [%s] records', len(schools))
+		user_profiles = []
+		users = []
 
 		for school in schools:
 			logger.info('School: %s', school['Name'])
-			random_url_integer = random.randrange(2)
-			base_url = self.urls[random_url_integer]
 
 			for role in self.roles:
-				users = RestClient.get(base_url, {})
-				if random_url_integer == 1:
-					users = users['results']
+				for index in range(0, 5):
 
-				user_profiles = Transformer.create_user_profiles(users, school, role)
-				CsvWriter.write(data=user_profiles)
+					if len(users) == 0:
+						data = self.get_generated_names()
+
+						if self.url_index == 1:
+							users = data['results']
+						else:
+							users = data
+
+					user_profiles.append(Transformer.create_user_profile(users.pop(0), school, role))
+
+		CsvWriter.write(data=user_profiles)

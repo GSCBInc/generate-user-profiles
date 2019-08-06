@@ -31,18 +31,11 @@ class Transformer:
                '@mailinator.com'
 
     @staticmethod
-    def create_user_profiles(users, school, role):
-        user_profiles = []
-        for u in users:
-            logger.info('Creating profile for user: %s', u)
-            profile = {
-                'Name': Transformer.get_first_name(u) + ' ' + Transformer.get_last_name(u),
-                'Email': Transformer.create_email(u),
-                'Password': 'Tams123',
-                'School': school['Name'],
-                'Role': role
-            }
-            user_profiles.append(profile)
-            logger.info('Created profile: %s', profile)
-
-        return user_profiles
+    def create_user_profile(user, school, role):
+        return {
+            'Name': Transformer.get_first_name(user) + ' ' + Transformer.get_last_name(user),
+            'Email': Transformer.create_email(user),
+            'Password': 'Tams123',
+            'School': school['Name'],
+            'Role': role
+        }
